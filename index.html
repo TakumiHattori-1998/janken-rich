@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<script src="js/jquery-2.1.3.min.js"></script>
+<link rel="stylesheet" href="css/sample.css">
+<title>じゃんけん</title>
+</head>
+<body>
+
+<header>
+  <h1 id="title">反射神経じゃんけん</h1>
+</header>
+
+<main>
+  <div id="kadai">
+    <h2 id="kadai_header">お題</h2>
+    <div id="order">
+      <button id="replace_here">START</button>
+    </div>
+    <div id="pc_hands">
+      <h2 id="pc_hands_str">PCの手</h2>
+      <img id="pc_hands_img" src="./img/hatena.png" alt="">
+    </div>
+  </div>
+  <div>
+    <h2 id="my_hands">あなたの手</h2>
+    <ul>
+      <li class="janken" id="gu_btn">
+        <button id="gu_toggleButton" class="off">
+          <img id="gu_img" src="./img/gu.jpeg" alt="">
+        </button>
+      </li>
+      <li class="janken" id="cho_btn">
+        <button id="cho_toggleButton" class="off">
+          <img id="cho_img" src="./img/cho.jpeg" alt="">
+        </button>
+      </li>
+      <li class="janken" id="par_btn">
+        <button id="par_toggleButton" class="off">
+          <img id="par_img" src="./img/par.jpeg" alt="">
+        </button>
+      </li>
+    </ul>
+  </div>
+  <ul>
+    <li><div>回答数：<span id="battle_cnt">0</span></div></li>
+    <li><div>正答数：<span id="win_cnt">0</span></div></li>
+    <li><div>正答率：<span id="win_rate">0</span></div></li>
+  </ul>
+</main>
+
+<footer></footer>
+<script>
+//じゃんけん用のSCRIPTを書いてください
+
+  // --関数の定義----------
+  //勝ち負け判定の関数の定義
+  function judgement(user_hands, pc_hands, win_cnt, battle_cnt){
+    let result = "";
+    stats.battle_cnt += 1;
+    if(user_hands == pc_hands){
+      result = "あいこ";
+    }else if((user_hands==1 && pc_hands==2) || (user_hands==2 && pc_hands==3) || (user_hands==3 && pc_hands==1)){
+      result = "勝ち";
+      stats.win_cnt += 1;
+    }else if((user_hands==1 && pc_hands==3) || (user_hands==2 && pc_hands==1) || (user_hands==3 && pc_hands==2)){
+      result = "負け";
+    }
+    return result;
+  }
+
+  // 数字とジャンケンの手の紐付け関数
+  function link_id_hands(id){
+    let result = "";
+    if(id == 1){
+      result = "グー";
+    }else if(id == 2){
+      result = "チョキ";
+    }else if(id == 3){
+      result = "パー";
+    }
+    return result;
+  }
+
+  // PCの手の決定関数
+  function decide_pc_hands(){
+    return Math.ceil(Math.random()*3);
+  }
+
+  // 画面の更新を行う関数
+  function update_screen(user_hands, stats){
+    let pc_hands = decide_pc_hands();
+    let result = judgement(user_hands, pc_hands, stats);
+
+    $('#pc_hands').html(link_id_hands(pc_hands));
+    $('#judgement').html(result);
+
+    stats.win_rate = stats.win_cnt/stats.battle_cnt
+    $('#battle_cnt').html(stats.battle_cnt);
+    $('#win_cnt').html(stats.win_cnt);
+    $('#win_rate').html(stats.win_rate);
+  }
+
+  // 正答の作成と指示文の作成
+  function gen_order(pc_hands){
+    function gen_answer(pc_hands, order_list){
+      let answer_list = [];
+      for (const elem of order_list){
+        answer_list.push(answer_table[pc_hands][elem]);
+      }
+      let answer_set = new Set(answer_list);
+      return answer_set;
+    }
+
+    const candidates = {1:"勝つ手", 2:"あいこの手", 3:"負ける手"};
+    let num_order = Math.ceil(Math.random()*2);
+    let ordered_hands = "";
+    let order_list = [];
+
+    if(num_order==1){
+      picked_num = Math.ceil(Math.random()*3);
+      ordered_hands = candidates[picked_num];
+      order_list.push(candidates[picked_num]);
+    }else{
+      removed_num = Math.ceil(Math.random()*3);
+      for(i=1; i<4; i++){
+        if(i != removed_num){
+          if(ordered_hands==""){
+            ordered_hands += candidates[i];
+            order_list.push(candidates[i]);
+          }else{
+            ordered_hands += " と ";
+            ordered_hands += candidates[i];
+            order_list.push(candidates[i]);
+          }
+        }
+      }
+    }
+
+    let order_element = document.getElementById('order');
+    let button_element = order_element.querySelector("button");
+    let order_str = document.createElement('p');
+
+    order_str = `PCに対して ${ordered_hands} をだせ`;
+
+    let answer_set = gen_answer(pc_hands, order_list);
+    let order_answer = [order_str, answer_set];
+
+    console.log(order_answer);
+
+    return order_answer;// 命令文と回答を返す
+  }
+
+  function updateMessage(order) {
+    let pc_hands_img = document.getElementById('pc_hands_img');
+    let pc_hands = decide_pc_hands();
+    pc_hands_img.style.display = "none";
+
+    if(pc_hands==1){
+      pc_hands_img.src = "./img/gu.jpeg";
+    }else if(pc_hands==2){
+      pc_hands_img.src = "./img/cho.jpeg";
+    }else if(pc_hands==3){
+      pc_hands_img.src = "./img/par.jpeg";
+    }
+    pc_hands_img.style.display = "block";
+    
+    let order_answer = gen_order(pc_hands);
+    let answer = order_answer[1];
+
+    console.log(answer);
+    order.textContent = order_answer[0];
+    order.style.display = "block"; // メッセージを表示
+
+    return answer;
+  }
+
+
+  // 答え合わせ
+  function check_answer(answer, gu_isOn, cho_isOn, par_isOn){
+    function check_myAnswer(gu_isOn, cho_isOn, par_isOn){
+      let myAnswer = new Set();
+      if(gu_isOn){myAnswer.add(1);}
+      if(cho_isOn){myAnswer.add(2);}
+      if(par_isOn){myAnswer.add(3);}
+      return myAnswer;
+    }
+
+    function update_result(){
+      $('#battle_cnt').html(game_settings.try_num);
+      $('#win_cnt').html(game_settings.correct_num);
+      $('#win_rate').html(game_settings.correct_answer_rate);
+    }
+    
+    function check(answer, myAnswer){
+      if (answer.size !== myAnswer.size) return false;
+      return [...answer].every(function(v){return myAnswer.has(v);});
+    }
+
+    let myAnswer = check_myAnswer(gu_isOn, cho_isOn, par_isOn);
+
+    console.log(answer);
+    console.log(myAnswer);
+    console.log((answer == myAnswer));
+
+
+    result = check(answer, myAnswer);
+
+    if (result){
+      console.log('correct')
+      game_settings.correct_num += 1;
+      game_settings.correct_answer_rate = game_settings.correct_num/game_settings.try_num;
+      update_result();
+    }else{
+      console.log('false')
+      game_settings.correct_answer_rate = game_settings.correct_num/game_settings.try_num;
+      update_result();
+    }
+  }
+  
+
+  // ボタン状態の更新ロジック
+  function buttonState(event, button){
+    if (button.classList.contains('off')){
+      button.classList.remove('off');
+      button.classList.add('on');
+    }else{
+      button.classList.remove('on');
+      button.classList.add('off');
+    }
+  }
+
+  // ボタン状態のリセットロジック
+  function resetButton(event, button){
+    button.classList.remove('on');
+    button.classList.add('off');
+  }
+  
+  
+
+  // --グローバル変数の定義----------
+  // ユーザの手の初期化
+  let user_hands = 1;
+
+  // PCの手の初期化
+  let pc_hands = 1;
+
+  // 結果の統計値
+  let stats = {
+    battle_cnt:0,
+    win_cnt:0,
+    win_rate:0
+  };
+
+  const answer_table = {
+    1:{"勝つ手":3, "あいこの手":1, "負ける手":2},
+    2:{"勝つ手":1, "あいこの手":2, "負ける手":3},
+    3:{"勝つ手":2, "あいこの手":3, "負ける手":1}
+  };
+
+  let game_settings = {
+    question_num:10,
+    try_num:0,
+    correct_num:0,
+    correct_answer_rate:0
+  }
+
+
+
+
+  // --メイン関数----------
+
+
+  document.getElementById('replace_here').addEventListener("click", function() {
+    let order = document.getElementById('order');
+    order.style.display = 'none';
+
+    // ボタンオブジェクトの作成
+    const gu_btn = document.getElementById('gu_toggleButton');
+    let gu_isOn = false;
+    const cho_btn = document.getElementById('cho_toggleButton');
+    let cho_isOn = false;
+    const par_btn = document.getElementById('par_toggleButton');
+    let par_isOn = false;
+
+    // ボタンのクリック時の挙動を定義
+    gu_btn.addEventListener('click', function(event){
+      gu_isOn = !gu_isOn;
+    });
+    cho_btn.addEventListener('click', function(event){
+      cho_isOn = !cho_isOn;
+    });
+    par_btn.addEventListener('click', function(event){
+      par_isOn = !par_isOn;
+    });
+
+    let answer;
+    setTimeout(() => {
+      intervalId = setInterval(() => {
+        setTimeout(() =>{
+          answer = updateMessage(order);
+
+          console.log(answer);// ここはundefinedではない。
+          game_settings.try_num += 1;
+          
+        }, 500);
+
+        console.log(answer);// ここがundefinedになる
+        console.log(gu_isOn);
+        console.log(cho_isOn);
+        console.log(par_isOn);
+
+        check_answer(answer, gu_isOn, cho_isOn, par_isOn);
+
+        // ボタンの状態のリセット
+        gu_isOn = false;
+        cho_isOn = false;
+        par_isOn = false;
+      }, 3500);
+    });
+  });
+</script>
+</body>
+</html>

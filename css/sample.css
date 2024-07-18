@@ -1,0 +1,136 @@
+body{
+    margin:0;
+    padding:0;
+    text-align:left;
+    font-size: 32px;
+}
+header{
+    background-color: #f5f7b3;
+    /* border-bottom: 1px solid #ccc; */
+    text-align: center;
+}
+
+#title {
+    margin: 0;
+    font-size: 50px;
+}
+
+main{
+    /* border-bottom:1px solid #ccc; */
+    width: 100%;
+}
+footer{
+    background-color: #fff;
+    border-bottom:1px solid #ccc;
+    text-align: center;
+}
+p{
+    font-size:200%;
+    text-align: center;
+    border-bottom:1px solid #fff;
+    height:200px;
+}
+ul{
+    padding: 0;
+    border-top: 1px solid #000000;
+    display:table;  /* 定義 */
+    table-layout: fixed;
+    width:100%;
+    margin: 0 auto 0;
+}
+li{
+    text-align: center;
+    list-style-type:none;
+    border: 1px solid #666;
+    background-color: #FFF;
+    display:table-cell;  /* 定義 */
+    cursor: pointer;
+}
+li:hover{
+    background: #0066CC;
+    color:#fff;
+}
+
+#my_hands{
+    font-size: 40px;
+    margin: 10 auto 0;
+    padding: 0;
+}
+
+#kadai {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    height: 300px;
+    margin: 20px auto 0;
+    border: 2px dashed black;
+    position: relative;
+    z-index: 1;
+}
+
+#kadai_header {
+    margin-top: 0px;
+    margin-left: 10px;
+}
+
+#order {
+    margin: 0 auto 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#replace_here {
+    font-size: 40px;
+    margin: 0 auto 20px;
+    height: 60px;
+    width: 180px;
+    background-color: #FFF;
+}
+
+#pc_hands {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+    position: absolute;
+    top: 5%;
+    right: 5%;
+
+}
+
+#pc_hands_str{
+    margin: 0;
+    padding: 0;
+    font-size: 40px;
+}
+
+#pc_hands_img{
+    width: 200px;
+    height: 200px;
+}
+
+#hands{
+    width: 80%;
+    margin: 0 auto 0;
+}
+
+#gu_img{
+    width: 200px;
+    height: 200px;
+}
+
+#cho_img{
+    width: 200px;
+    height: 200px;
+}
+
+#par_img{
+    width: 200px;
+    height: 200px;
+}
+
+#game_stats{
+    width: 80%;
+    margin: 0 auto 0;
+}
