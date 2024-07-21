@@ -15,7 +15,7 @@
 
 <main>
   <div id="kadai">
-    <h2 id="kadai_header">お題</h2>
+    <h2 id="kadai_header">お題<span id="variablePart"></span></h2>
     <div id="order">
       <button id="replace_here">START</button>
     </div>
@@ -56,121 +56,58 @@
 //じゃんけん用のSCRIPTを書いてください
 
   // --関数の定義----------
-  //勝ち負け判定の関数の定義
-  function judgement(user_hands, pc_hands, win_cnt, battle_cnt){
-    let result = "";
-    stats.battle_cnt += 1;
-    if(user_hands == pc_hands){
-      result = "あいこ";
-    }else if((user_hands==1 && pc_hands==2) || (user_hands==2 && pc_hands==3) || (user_hands==3 && pc_hands==1)){
-      result = "勝ち";
-      stats.win_cnt += 1;
-    }else if((user_hands==1 && pc_hands==3) || (user_hands==2 && pc_hands==1) || (user_hands==3 && pc_hands==2)){
-      result = "負け";
-    }
-    return result;
-  }
-
-  // 数字とジャンケンの手の紐付け関数
-  function link_id_hands(id){
-    let result = "";
-    if(id == 1){
-      result = "グー";
-    }else if(id == 2){
-      result = "チョキ";
-    }else if(id == 3){
-      result = "パー";
-    }
-    return result;
-  }
-
-  // PCの手の決定関数
-  function decide_pc_hands(){
-    return Math.ceil(Math.random()*3);
-  }
-
-  // 画面の更新を行う関数
-  function update_screen(user_hands, stats){
-    let pc_hands = decide_pc_hands();
-    let result = judgement(user_hands, pc_hands, stats);
-
-    $('#pc_hands').html(link_id_hands(pc_hands));
-    $('#judgement').html(result);
-
-    stats.win_rate = stats.win_cnt/stats.battle_cnt
-    $('#battle_cnt').html(stats.battle_cnt);
-    $('#win_cnt').html(stats.win_cnt);
-    $('#win_rate').html(stats.win_rate);
-  }
 
   // 正答の作成と指示文の作成
   function gen_order(pc_hands){
     function gen_answer(pc_hands, order_list){
-      let answer_list = [];
+      let answer_set = new Set();
       for (const elem of order_list){
-        answer_list.push(answer_table[pc_hands][elem]);
+        answer_set.add(answer_table[pc_hands][elem]);
       }
-      let answer_set = new Set(answer_list);
       return answer_set;
     }
 
-    const candidates = {1:"勝つ手", 2:"あいこの手", 3:"負ける手"};
-    let num_order = Math.ceil(Math.random()*2);
+    function getRandumUniqueElements(array, count) {
+      const shuffled = array.slice().sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, count);
+    }
+
+    // const candidates = {1:"勝つ手", 2:"あいこの手", 3:"負ける手"};
+    const candidates = ["勝つ手", "あいこの手", "負ける手"]
+    let num_order = Math.ceil(Math.random()*2); //ランダムに指示を1つか2つか生成
     let ordered_hands = "";
     let order_list = [];
 
-    if(num_order==1){
-      picked_num = Math.ceil(Math.random()*3);
-      ordered_hands = candidates[picked_num];
-      order_list.push(candidates[picked_num]);
-    }else{
-      removed_num = Math.ceil(Math.random()*3);
-      for(i=1; i<4; i++){
-        if(i != removed_num){
-          if(ordered_hands==""){
-            ordered_hands += candidates[i];
-            order_list.push(candidates[i]);
-          }else{
-            ordered_hands += " と ";
-            ordered_hands += candidates[i];
-            order_list.push(candidates[i]);
-          }
-        }
-      }
-    }
+    // 1なら指示を一つ、2なら指示を2つ指定する
+    order_list = getRandumUniqueElements(candidates, num_order);
+    ordered_hands = order_list.join(" と ");
 
-    let order_element = document.getElementById('order');
-    let button_element = order_element.querySelector("button");
     let order_str = document.createElement('p');
-
     order_str = `PCに対して ${ordered_hands} をだせ`;
-
+    
     let answer_set = gen_answer(pc_hands, order_list);
     let order_answer = [order_str, answer_set];
-
-    console.log(order_answer);
 
     return order_answer;// 命令文と回答を返す
   }
 
   function updateMessage(order) {
     let pc_hands_img = document.getElementById('pc_hands_img');
-    let pc_hands = decide_pc_hands();
+    let pc_hands = Math.ceil(Math.random()*3);// PCの手をランダムに決定
     pc_hands_img.style.display = "none";
 
-    if(pc_hands==1){
-      pc_hands_img.src = "./img/gu.jpeg";
-    }else if(pc_hands==2){
-      pc_hands_img.src = "./img/cho.jpeg";
-    }else if(pc_hands==3){
-      pc_hands_img.src = "./img/par.jpeg";
+    let dict = {
+      1:"gu",
+      2:"cho",
+      3:"par"
     }
+
+    pc_hands_img.src = `./img/${dict[pc_hands]}.jpeg`;
     pc_hands_img.style.display = "block";
     
     let order_answer = gen_order(pc_hands);
     let answer = order_answer[1];
 
-    console.log(answer);
     order.textContent = order_answer[0];
     order.style.display = "block"; // メッセージを表示
 
@@ -188,24 +125,18 @@
       return myAnswer;
     }
 
+    function check(answer, myAnswer){
+      if (answer.size !== myAnswer.size) return false;
+      return [...answer].every(function(v){return myAnswer.has(v);});
+    }
+
     function update_result(){
       $('#battle_cnt').html(game_settings.try_num);
       $('#win_cnt').html(game_settings.correct_num);
       $('#win_rate').html(game_settings.correct_answer_rate);
     }
     
-    function check(answer, myAnswer){
-      if (answer.size !== myAnswer.size) return false;
-      return [...answer].every(function(v){return myAnswer.has(v);});
-    }
-
     let myAnswer = check_myAnswer(gu_isOn, cho_isOn, par_isOn);
-
-    console.log(answer);
-    console.log(myAnswer);
-    console.log((answer == myAnswer));
-
-
     result = check(answer, myAnswer);
 
     if (result){
@@ -268,8 +199,6 @@
   }
 
 
-
-
   // --メイン関数----------
 
 
@@ -285,32 +214,45 @@
     const par_btn = document.getElementById('par_toggleButton');
     let par_isOn = false;
 
+    const variablePart = document.getElementById('variablePart');
+
     // ボタンのクリック時の挙動を定義
     gu_btn.addEventListener('click', function(event){
       gu_isOn = !gu_isOn;
+      if (gu_isOn){gu_btn.style.borderColor = 'red';
+      }else{gu_btn.style.borderColor = 'black';}
+      console.log(gu_isOn);
     });
     cho_btn.addEventListener('click', function(event){
       cho_isOn = !cho_isOn;
+      if (cho_isOn){cho_btn.style.borderColor = 'red';
+      }else{cho_btn.style.borderColor = 'black';}
+      console.log(cho_isOn);
     });
     par_btn.addEventListener('click', function(event){
       par_isOn = !par_isOn;
+      if (par_isOn){par_btn.style.borderColor = 'red';
+      }else{par_btn.style.borderColor = 'black';}
+      console.log(par_isOn);
     });
 
     let answer;
     setTimeout(() => {
       intervalId = setInterval(() => {
+
         setTimeout(() =>{
+          if(game_settings.try_num == game_settings.question_num){
+            clearInterval(intervalId);
+            alert('問題数: ' + game_settings.question_num + '\n' +
+                  '正答数: ' + game_settings.correct_num + '\n' +
+                  '正答率: ' + Math.round(game_settings.correct_answer_rate * 100) /100 + '\n'
+            )
+          }
           answer = updateMessage(order);
-
-          console.log(answer);// ここはundefinedではない。
           game_settings.try_num += 1;
-          
+          variablePart.textContent = ' (' + game_settings.try_num + '/' + game_settings.question_num + ')';
+          // console.log(game_settings.try_num + '/' + game_settings.question_num);
         }, 500);
-
-        console.log(answer);// ここがundefinedになる
-        console.log(gu_isOn);
-        console.log(cho_isOn);
-        console.log(par_isOn);
 
         check_answer(answer, gu_isOn, cho_isOn, par_isOn);
 
@@ -318,6 +260,11 @@
         gu_isOn = false;
         cho_isOn = false;
         par_isOn = false;
+
+        gu_btn.style.borderColor = 'black';
+        cho_btn.style.borderColor = 'black';
+        par_btn.style.borderColor = 'black';
+
       }, 3500);
     });
   });

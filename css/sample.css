@@ -134,3 +134,15 @@ li:hover{
     width: 80%;
     margin: 0 auto 0;
 }
+
+#gu_toggleButton{
+    border-width: 5px;
+}
+
+#cho_toggleButton{
+    border-width: 5px;
+}
+
+#par_toggleButton{
+    border-width: 5px;
+}
